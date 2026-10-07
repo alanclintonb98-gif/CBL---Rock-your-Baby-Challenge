@@ -1,0 +1,128 @@
+#include <libpynq.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+
+#define SLAVE_ADDRESS 0x42
+#define TEST_REGISTER 0x00
+
+int main(void)
+{
+    pynq_init();
+
+    // IIC0 = master on Arduino SDA/SCL
+    switchbox_set_pin(IO_AR_SDA, SWB_IIC0_SDA);
+    switchbox_set_pin(IO_AR_SCL, SWB_IIC0_SCL);
+
+    // IIC1 = slave on Pmod A
+    switchbox_set_pin(IO_PMODA4, SWB_IIC1_SDA);
+    switchbox_set_pin(IO_PMODA3, SWB_IIC1_SCL);
+
+    iic_init(IIC0);
+    iic_init(IIC1);
+
+    uint32_t registers[1] = {0};
+
+    iic_set_slave_mode(
+        IIC1,
+        SLAVE_ADDRESS,
+        registers,
+        1
+    );
+
+    pid_t slave_pid = fork();
+
+    if (slave_pid < 0)
+    {
+        perror("fork");
+        return EXIT_FAILURE;
+    }
+
+    if (slave_pid == 0)
+    {
+        printf("[SLAVE] Listening at address 0x%02X...\n",
+               SLAVE_ADDRESS);
+
+        fflush(stdout);
+
+        while (1)
+        {
+            iic_slave_mode_handler(IIC1);
+            sleep_msec(1);
+        }
+    }
+
+    // Give slave time to start
+    sleep_msec(100);
+
+    uint32_t sent = 42;
+
+    printf("[MASTER] Writing %u...\n", sent);
+
+    bool write_error = iic_write_register(
+        IIC0,
+        SLAVE_ADDRESS,
+        TEST_REGISTER,
+        (uint8_t *)&sent,
+        sizeof(sent)
+    );
+
+    if (write_error)
+    {
+        printf("[MASTER] Write failed\n");
+
+        kill(slave_pid, SIGTERM);
+        waitpid(slave_pid, NULL, 0);
+
+        return EXIT_FAILURE;
+    }
+
+    printf("[MASTER] Write successful\n");
+
+    sleep_msec(50);
+
+    uint32_t received = 0;
+
+    printf("[MASTER] Reading back...\n");
+
+    bool read_error = iic_read_register(
+        IIC0,
+        SLAVE_ADDRESS,
+        TEST_REGISTER,
+        (uint8_t *)&received,
+        sizeof(received)
+    );
+
+    if (read_error)
+    {
+        printf("[MASTER] Read failed\n");
+
+        kill(slave_pid, SIGTERM);
+        waitpid(slave_pid, NULL, 0);
+
+        return EXIT_FAILURE;
+    }
+
+    printf("[MASTER] Received: %u\n", received);
+
+    if (received == sent)
+    {
+        printf("\nI2C LOOPBACK TEST PASSED\n");
+    }
+    else
+    {
+        printf("\nI2C LOOPBACK TEST FAILED\n");
+    }
+
+    kill(slave_pid, SIGTERM);
+    waitpid(slave_pid, NULL, 0);
+
+    iic_destroy(IIC0);
+    iic_destroy(IIC1);
+    pynq_destroy();
+
+    return EXIT_SUCCESS;
+}

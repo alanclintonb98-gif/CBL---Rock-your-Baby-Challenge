@@ -5,18 +5,41 @@ int main (void)
   pynq_init();
   iic_init(IIC0);
   uint32_t i;
+  // you can use multiple slaves, here only one is shown
   uint32_t slave_hb = 0x10;
   uint32_t slave_snd = 0x20;
   uint32_t slave_motr = 0x30;
+  // read out all registers of the slave
 
-  i = 0 //in hb
-  a= 0  //in snd
-  b = 0 //out mtr
+  uint32_t i = 0; //in hb
+  uint32_t a= 20;  //in snd
+  uint32_t b = 10; //out mtr
+
+    display_t display;
+    display_init(&display);
+
+    FontxFile fx16G[2];
+    InitFontx(fx16G, "../../fonts/ILGH16XB.FNT", "");
+    
+    uint8_t buffer_fx16G[128]; 
+    uint8_t fontWidth_fx16G, fontHeight_fx16G;
+  GetFontx(fx16G, 0, buffer_fx16G, &fontWidth_fx16G, &fontHeight_fx16G);
+  displaySetFontDirection(&display, TEXT_DIRECTION0);
+  
+  uint8_t text_buffer[32];
+        
   while (1) { 
-    iic_read_register(IIC0, slave_hb, 0, (uint8_t *) &i, 4)
-    iic_read_register(IIC0, slave_snd, 0, (uint8_t *) &a, 4)
-    iic_write_register(IIC0, slave_motr, 0, (uint8_t *) &b, 4)
-    sleep_ms(50)
+    iic_read_register(IIC0, slave_hb, 0, (uint8_t *) &i, 4);
+    iic_read_register(IIC0, slave_snd, 0, (uint8_t *) &a, 4);
+    iic_write_register(IIC0, slave_motr, 0, (uint8_t *) &b, 4);
+//                        display value read
+//--------------------------------------------------------------------------------------------
+    snprintf((char*)text_buffer, sizeof(text_buffer), "Reg0: %u", i);
+
+        displayFillScreen(&display, RGB_BLACK);
+        displayDrawString(&display, fx16G, 15, fontHeight_fx16G * 6, text_buffer, RGB_WHITE);
+//----------------------------------------------------------------------------------------------
+    sleep_msec(50);
 
   }
 

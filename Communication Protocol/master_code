@@ -1,0 +1,25 @@
+#include <libpynq.h>
+int main (void)
+{
+  // initialise all I/O
+  pynq_init();
+  iic_init(IIC0);
+  uint32_t i;
+  uint32_t slave_hb = 0x10;
+  uint32_t slave_snd = 0x20;
+  uint32_t slave_motr = 0x30;
+
+  i = 0 //in hb
+  a= 0  //in snd
+  b = 0 //out mtr
+  while (1) { 
+    iic_read_register(IIC0, slave_hb, 0, (uint8_t *) &i, 4)
+    iic_read_register(IIC0, slave_snd, 0, (uint8_t *) &a, 4)
+    iic_write_register(IIC0, slave_motr, 0, (uint8_t *) &b, 4)
+    sleep_ms(50)
+
+  }
+
+  pynq_destroy();
+  return EXIT_SUCCESS;
+}

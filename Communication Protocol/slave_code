@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <libpynq.h>
 int main(void)
 {                                           //----------------------------------------
   const uint32_t my_slave_address = 0x70;   // change address per slave
@@ -12,11 +14,30 @@ int main(void)
   iic_init(IIC0);
   iic_reset(IIC0);
   iic_set_slave_mode(IIC0, my_slave_address,
-                     &(my_register_map[0]), my_register_map_length);
+  &(my_register_map[0]), my_register_map_length);
+
+  display_t display;
+    display_init(&display);
+
+    FontxFile fx16G[2];
+    InitFontx(fx16G, "../../fonts/ILGH16XB.FNT", "");
+    
+    uint8_t buffer_fx16G[128]; 
+    uint8_t fontWidth_fx16G, fontHeight_fx16G;
+  GetFontx(fx16G, 0, buffer_fx16G, &fontWidth_fx16G, &fontHeight_fx16G);
+  displaySetFontDirection(&display, TEXT_DIRECTION0);
+  
   while (1) {
     iic_slave_mode_handler(IIC0);
-    // insert your own code here, to do whatever the slave needs to do;
-    // but ensure that you execute the slave mode handler regularly enough
+//                        print on screen my_register_map[0]
+ //-------------------------------------------------------------------------------------------
+       uint8_t text_buffer[32];
+        snprintf((char*)text_buffer, sizeof(text_buffer), "Reg0: %u", my_register_map[0]);
+
+        displayFillScreen(&display, RGB_BLACK);
+        displayDrawString(&display, fx16G, 15, fontHeight_fx16G * 6, text_buffer, RGB_WHITE);
+//---------------------------------------------------------------------------------------------
+
     sleep_msec(10);
   }
   iic_destroy(IIC0);

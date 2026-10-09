@@ -4,11 +4,11 @@ int main(void)
 {                                           //----------------------------------------
   const uint32_t my_slave_address = 0x70;   // change address per slave
                                             //----------------------------------------
-
-  uint32_t my_register_map[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,
+ 
+  uint32_t reg_map[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,
        14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
   const uint32_t my_register_map_length =
-                       sizeof(my_register_map)/sizeof(uint32_t);
+                       sizeof(reg_map)/sizeof(uint32_t);
  
   pynq_init();
   iic_init(IIC0);
@@ -18,7 +18,7 @@ int main(void)
   switchbox_set_pin(IO_AR_SDA, SWB_IIC0_SDA);
   
   iic_set_slave_mode(IIC0, my_slave_address,
-  &(my_register_map[0]), my_register_map_length);
+  &(reg_map[0]), my_register_map_length);
 
   display_t display;
     display_init(&display);

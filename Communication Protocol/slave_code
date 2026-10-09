@@ -30,6 +30,13 @@ int main(void)
     uint8_t fontWidth_fx16G, fontHeight_fx16G;
   GetFontx(fx16G, 0, buffer_fx16G, &fontWidth_fx16G, &fontHeight_fx16G);
   displaySetFontDirection(&display, TEXT_DIRECTION0);
+
+//                     check if didnt explode:)
+// --------------------------------------------------------------------------
+  displayFillScreen(&display, RGB_BLACK);
+  snprintf((char*)text_buffer, sizeof(text_buffer), "Slave Ready...");
+  displayDrawString(&display, fx16G, 15, fontHeight_fx16G * 6, text_buffer, RGB_GREEN);
+// -------------------------------------------------------------------------
   
   while (1) {
     iic_slave_mode_handler(IIC0);

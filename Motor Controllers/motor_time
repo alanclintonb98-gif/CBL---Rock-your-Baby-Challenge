@@ -1,0 +1,34 @@
+#include <stdint.h>
+#include <stdlib.h> 
+#include <libpynq.h>
+#include <pinmap.h>
+#include <switchbox.h>
+
+int main(void) {
+    pynq_init();
+    
+    switchbox_set_pin(IO_AR0, SWB_PWM0);
+    
+
+    uint32_t dc = 800;
+    pwm_init(PWM0, dc); 
+    pwm_set_period(PWM0, 1000);
+
+    uint32_t step_size = 100;
+
+    while(1) {
+        pwm_set_duty_cycle(PWM0, dc); 
+        
+        dc -= step_size;
+        
+        if (dc < 100) {
+            dc = 800;
+        }
+  
+        sleep_msec(1000); 
+    }
+    
+    pwm_destroy(PWM0);
+    pynq_destroy();
+    return EXIT_SUCCESS;
+}

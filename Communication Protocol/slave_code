@@ -15,8 +15,8 @@ int main(void)
   iic_init(IIC0);
   iic_reset(IIC0);
   switchbox_init();
-  switchbox_set_pin(IO_AR_SCL, SWB_IIC0_SCL);
-  switchbox_set_pin(IO_AR_SDA, SWB_IIC0_SDA);
+  switchbox_set_pin(IO_AR_0, SWB_IIC0_SCL);
+  switchbox_set_pin(IO_AR_1, SWB_IIC0_SDA);
 
   iic_set_slave_mode(IIC0, my_slave_address,
   &(reg_map[0]), my_register_map_length);

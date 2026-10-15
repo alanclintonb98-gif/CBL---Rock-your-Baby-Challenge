@@ -15,6 +15,7 @@ int main(void)
   iic_init(IIC0);
   iic_reset(IIC0);
   switchbox_init();
+switches_init();
   switchbox_set_pin(IO_AR_0, SWB_IIC0_SCL);
   switchbox_set_pin(IO_AR_1, SWB_IIC0_SDA);
 
@@ -54,7 +55,8 @@ reg_map[0] +=1
         displayDrawString(&display, fx16G, 15, fontHeight_fx16G * 6, text_buffer, RGB_WHITE);
     sleep_msec(10);
   }
-  iic_destroy(IIC0);
+  iic_destroy(IIC0); 
+switches_destroy();
   switchbox_destroy();
   pynq_destroy();
   return EXIT_SUCCESS;
